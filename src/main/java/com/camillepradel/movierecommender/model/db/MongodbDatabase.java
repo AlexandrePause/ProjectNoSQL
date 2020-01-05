@@ -3,54 +3,150 @@ package com.camillepradel.movierecommender.model.db;
 import com.camillepradel.movierecommender.model.Genre;
 import com.camillepradel.movierecommender.model.Movie;
 import com.camillepradel.movierecommender.model.Rating;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MongodbDatabase extends AbstractDatabase {
+    
+    MongoClient mongoClient;
+
+	public MongodbDatabase() {
+		try {
+			mongoClient = new MongoClient("localhost", 27017);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
 
     @Override
     public List<Movie> getAllMovies() {
-        // TODO: write query to retrieve all movies from DB
         List<Movie> movies = new LinkedList<Movie>();
-        Genre genre0 = new Genre(0, "genre0");
-        Genre genre1 = new Genre(1, "genre1");
-        Genre genre2 = new Genre(2, "genre2");
-        movies.add(new Movie(0, "Titre 0", Arrays.asList(new Genre[]{genre0, genre1})));
-        movies.add(new Movie(1, "Titre 1", Arrays.asList(new Genre[]{genre0, genre2})));
-        movies.add(new Movie(2, "Titre 2", Arrays.asList(new Genre[]{genre1})));
-        movies.add(new Movie(3, "Titre 3", Arrays.asList(new Genre[]{genre0, genre1, genre2})));
-        return movies;
+        long startTime = System.currentTimeMillis();
+	DB db = mongoClient.getDB("NoSqlProject");
+	DBCollection collMovies = db.getCollection("movies");
+        
+        Iterator<DBObject> cursorMovies = collMovies.find().iterator();
+            while (cursorMovies.hasNext()) {
+		final DBObject currentMovie = cursorMovies.next();
+		movies.add(createMovie(db,currentMovie));
+            }
+        long endTime = System.currentTimeMillis();
+        System.out.println("getAllMovies took " + (endTime - startTime) + " milliseconds (MongoDB)");
+	return movies;
     }
+    
+    private Movie createMovie(DB db,DBObject currentMovie) {
+		try {
+
+			DBCollection collectMovieGenres = db.getCollection("mov_genre");
+			DBCollection collectGenres = db.getCollection("genres");
+                        
+			List<Genre> currentMovieGenres = new ArrayList<Genre>();
+			BasicDBObject movieGenreFilter = new BasicDBObject();
+                        
+                        int currentMovieId = Integer.parseInt(currentMovie.get("id").toString());
+                        
+			movieGenreFilter.put("mov_id", currentMovieId);
+
+			Iterator<DBObject> cursorMovieGenre = collectMovieGenres.find(movieGenreFilter).iterator();
+			while (cursorMovieGenre.hasNext()) {
+				final DBObject currentMovieGenreAssociation = cursorMovieGenre.next();
+
+				BasicDBObject genreFilter = new BasicDBObject();
+                                int currentMovieGenreAssociationGenre = Integer.parseInt(currentMovieGenreAssociation.get("genre").toString());
+				genreFilter.put("id", currentMovieGenreAssociationGenre);
+
+				DBObject currentGenre = collectGenres.findOne(genreFilter);
+                                int currentGenreId = Integer.parseInt(currentGenre.get("id").toString());
+				currentMovieGenres.add(new Genre(currentGenreId, currentGenre.get("name").toString()));
+			}
+			return new Movie(Integer.parseInt(currentMovie.get("id").toString()),currentMovie.get("title").toString(), currentMovieGenres);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+                
 
     @Override
     public List<Movie> getMoviesRatedByUser(int userId) {
-        // TODO: write query to retrieve all movies rated by user with id userId
         List<Movie> movies = new LinkedList<Movie>();
-        Genre genre0 = new Genre(0, "genre0");
-        Genre genre1 = new Genre(1, "genre1");
-        Genre genre2 = new Genre(2, "genre2");
-        movies.add(new Movie(0, "Titre 0", Arrays.asList(new Genre[]{genre0, genre1})));
-        movies.add(new Movie(3, "Titre 3", Arrays.asList(new Genre[]{genre0, genre1, genre2})));
-        return movies;
+	DB db = mongoClient.getDB("NoSqlProject");
+	DBCollection collectRatings = db.getCollection("ratings");
+	DBCollection collectMovies = db.getCollection("movies");
+
+	BasicDBObject userRatingsFilter = new BasicDBObject();
+	userRatingsFilter.put("user_id", userId);
+	Iterator<DBObject> cursorRatings = collectRatings.find(userRatingsFilter).iterator();
+	while (cursorRatings.hasNext()) {
+		final DBObject currentRating = cursorRatings.next();
+		BasicDBObject ratingMoviesFilter = new BasicDBObject();
+		ratingMoviesFilter.put("id", Integer.parseInt(currentRating.get("mov_id").toString()));
+		DBObject currentMovie = collectMovies.findOne(ratingMoviesFilter);
+		movies.add(createMovie(db,currentMovie));
+		}
+
+	return movies;
     }
 
     @Override
     public List<Rating> getRatingsFromUser(int userId) {
-        // TODO: write query to retrieve all ratings from user with id userId
         List<Rating> ratings = new LinkedList<Rating>();
-        Genre genre0 = new Genre(0, "genre0");
-        Genre genre1 = new Genre(1, "genre1");
-        ratings.add(new Rating(new Movie(0, "Titre 0", Arrays.asList(new Genre[]{genre0, genre1})), userId, 3));
-        ratings.add(new Rating(new Movie(2, "Titre 2", Arrays.asList(new Genre[]{genre1})), userId, 4));
-        return ratings;
+        DB db = mongoClient.getDB("MoviesProj");
+        DBCollection collectRatings = db.getCollection("ratings");
+	DBCollection collectMovies = db.getCollection("movies");
+
+	BasicDBObject userRatingsFilter = new BasicDBObject();
+	userRatingsFilter.put("user_id", userId);
+	Iterator<DBObject> cursorRatings = collectRatings.find(userRatingsFilter).iterator();
+        
+	while (cursorRatings.hasNext()) {
+		final DBObject currentRating = cursorRatings.next();
+		BasicDBObject ratingMoviesFilter = new BasicDBObject();
+		ratingMoviesFilter.put("id", Integer.parseInt(currentRating.get("mov_id").toString()));
+		DBObject currentMovie = collectMovies.findOne(ratingMoviesFilter);
+		ratings.add(new Rating(createMovie(db,currentMovie), userId, Integer.parseInt(currentRating.get("rating").toString())));
+		}
+        
+		return ratings;
     }
 
     @Override
     public void addOrUpdateRating(Rating rating) {
-        // TODO: add query which
-        //         - add rating between specified user and movie if it doesn't exist
-        //         - update it if it does exist
+	DB db = mongoClient.getDB("MoviesProj");
+	DBCollection collectionRatings = db.getCollection("ratings");
+
+	BasicDBObject ratingFilter = new BasicDBObject();
+	ratingFilter.put("user_id", rating.getUserId());
+	ratingFilter.put("mov_id", rating.getMovieId());
+	DBObject cursorRatings = collectionRatings.findOne(ratingFilter);
+        
+	if(cursorRatings != null) {
+		BasicDBObject updateFields = new BasicDBObject();
+                BasicDBObject setQuery = new BasicDBObject();
+                
+		updateFields.append("rating", rating.getScore());
+		setQuery.append("$set", updateFields);
+
+		collectionRatings.update(ratingFilter, setQuery);
+	}
+	else {
+		BasicDBObject createFields = new BasicDBObject();
+                
+		createFields.append("user_id", rating.getUserId());
+		createFields.append("mov_id", rating.getMovieId());
+		createFields.append("rating", rating.getScore());
+		collectionRatings.insert(createFields);
+	}
     }
 
     @Override

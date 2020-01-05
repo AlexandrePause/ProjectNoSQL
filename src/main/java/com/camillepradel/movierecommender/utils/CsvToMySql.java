@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class CsvToMySql {
 
-    static final String pathToCsvFiles = "D:\\MovieRecommender\\src\\main\\java\\com\\camillepradel\\movierecommender\\utils\\";
+    static final String pathToCsvFiles = "C:\\Users\\pause\\OneDrive\\Documents\\workspace\\bigdata\\MovieRecommender\\src\\main\\java\\com\\camillepradel\\movierecommender\\utils\\";
     static final String usersCsvFile = pathToCsvFiles + "users.csv";
     static final String moviesCsvFile = pathToCsvFiles + "movies.csv";
     static final String genresCsvFile = pathToCsvFiles + "genres.csv";

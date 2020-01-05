@@ -3,23 +3,85 @@ package com.camillepradel.movierecommender.model.db;
 import com.camillepradel.movierecommender.model.Genre;
 import com.camillepradel.movierecommender.model.Movie;
 import com.camillepradel.movierecommender.model.Rating;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Record;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
+import org.neo4j.driver.v1.TransactionWork;
 
 public class Neo4jDatabase extends AbstractDatabase {
+ Connection connection = null;
+  private final Driver driver;
 
+    // db connection info
+    String url = "bolt://localhost:7687";
+    String login = "neo4j";
+    String password = "Q86PhnJRiEa7";
+
+    public Neo4jDatabase() {
+        // load JDBC driver
+          driver = GraphDatabase.driver(url, AuthTokens.basic(login, password ));
+        try {
+            Class.forName("org.neo4j.jdbc.Driver").newInstance();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException ex) {
+         Logger.getLogger(Neo4jDatabase.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+         Logger.getLogger(Neo4jDatabase.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try {
+            connection = DriverManager.getConnection(url, login, password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     @Override
     public List<Movie> getAllMovies() {
-        // TODO: write query to retrieve all movies from DB
         List<Movie> movies = new LinkedList<Movie>();
-        Genre genre0 = new Genre(0, "genre0");
-        Genre genre1 = new Genre(1, "genre1");
-        Genre genre2 = new Genre(2, "genre2");
-        movies.add(new Movie(0, "Titre 0", Arrays.asList(new Genre[]{genre0, genre1})));
-        movies.add(new Movie(1, "Titre 1", Arrays.asList(new Genre[]{genre0, genre2})));
-        movies.add(new Movie(2, "Titre 2", Arrays.asList(new Genre[]{genre1})));
-        movies.add(new Movie(3, "Titre 3", Arrays.asList(new Genre[]{genre0, genre1, genre2})));
+        Session session = driver.session();
+        long startTime = System.currentTimeMillis();
+            StatementResult rs = session.run( "MATCH (m:Movie)-[r]->(g:Genre) WHERE type(r) = 'CATEGORIZED_AS' RETURN m.id,m.title, collect(g.name) as g_name ORDER BY m.id" );
+        long endTime = System.currentTimeMillis();
+        System.out.println("getAllMovies took " + (endTime - startTime) + " milliseconds (Neo4j)");
+        
+        while (rs.hasNext())
+        {
+            Record record = rs.next();
+            int id = record.get("m.id").asInt();
+            String titre = record.get("m.title").asString();
+            
+            List<Object> genres_name = record.get("g_name").asList();
+            List<Genre> genres = new ArrayList<Genre>();
+            for(int i=0; i < genres_name.size(); i++) {
+                StatementResult rs2 = session.run("Match (g:Genre {name:\""+ genres_name.get(i).toString() + "\"}) return g.id");
+                Record recordGenre = rs2.single();
+                int genreId = recordGenre.get("g.id").asInt();
+            	genres.add(new Genre(genreId, genres_name.get(i).toString()));
+            }
+            
+            movies.add(new Movie(id, titre, genres));
+        }
+        session.close();
+        
         return movies;
     }
 

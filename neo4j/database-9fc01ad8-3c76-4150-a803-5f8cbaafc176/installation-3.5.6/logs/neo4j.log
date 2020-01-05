@@ -1,0 +1,48 @@
+2020-01-04 17:16:49.407+0000 INFO  ======== Neo4j 3.5.6 ========
+2020-01-04 17:16:49.420+0000 INFO  Starting...
+2020-01-04 17:16:50.627+0000 INFO  Initiating metrics...
+2020-01-04 17:16:52.399+0000 INFO  Sending metrics to CSV file at C:\Users\pause\.Neo4jDesktop\neo4jDatabases\database-9fc01ad8-3c76-4150-a803-5f8cbaafc176\installation-3.5.6\metrics
+2020-01-04 17:16:53.595+0000 INFO  Bolt enabled on 127.0.0.1:7687.
+2020-01-04 17:16:55.253+0000 INFO  Started.
+2020-01-04 17:16:55.423+0000 WARN  Server thread metrics not available (missing neo4j.server.threads.jetty.all)
+2020-01-04 17:16:55.425+0000 WARN  Server thread metrics not available (missing neo4j.server.threads.jetty.idle)
+2020-01-04 17:16:55.465+0000 INFO  Mounted REST API at: /db/manage
+2020-01-04 17:16:55.574+0000 INFO  Server thread metrics have been registered successfully
+2020-01-04 17:16:56.453+0000 INFO  Remote interface available at http://localhost:7474/
+2020-01-05 07:40:55.789+0000 INFO  ======== Neo4j 3.5.6 ========
+2020-01-05 07:40:55.801+0000 INFO  Starting...
+2020-01-05 07:40:57.478+0000 INFO  Initiating metrics...
+2020-01-05 07:40:59.633+0000 INFO  Sending metrics to CSV file at C:\Users\pause\.Neo4jDesktop\neo4jDatabases\database-9fc01ad8-3c76-4150-a803-5f8cbaafc176\installation-3.5.6\metrics
+2020-01-05 07:41:00.657+0000 INFO  Bolt enabled on 127.0.0.1:7687.
+2020-01-05 07:41:02.663+0000 WARN  Server thread metrics not available (missing neo4j.server.threads.jetty.all)
+2020-01-05 07:41:02.666+0000 WARN  Server thread metrics not available (missing neo4j.server.threads.jetty.idle)
+2020-01-05 07:41:03.052+0000 INFO  Started.
+2020-01-05 07:41:03.321+0000 INFO  Mounted REST API at: /db/manage
+2020-01-05 07:41:03.416+0000 INFO  Server thread metrics have been registered successfully
+2020-01-05 07:41:04.330+0000 INFO  Remote interface available at http://localhost:7474/
+2020-01-05 07:51:21.718+0000 WARN  Unsupported authentication token, scheme='none' only allowed when auth is disabled: { scheme='none' }
+2020-01-05 07:55:45.757+0000 WARN  Unsupported authentication token, scheme='none' only allowed when auth is disabled: { scheme='none' }
+2020-01-05 08:00:48.769+0000 WARN  The client is unauthorized due to authentication failure.
+2020-01-05 08:03:32.859+0000 WARN  The client is unauthorized due to authentication failure.
+2020-01-05 10:20:48.341+0000 INFO  ======== Neo4j 3.5.6 ========
+2020-01-05 10:20:48.355+0000 INFO  Starting...
+2020-01-05 10:20:49.567+0000 INFO  Initiating metrics...
+2020-01-05 10:20:51.427+0000 INFO  Sending metrics to CSV file at C:\Users\pause\.Neo4jDesktop\neo4jDatabases\database-9fc01ad8-3c76-4150-a803-5f8cbaafc176\installation-3.5.6\metrics
+2020-01-05 10:20:52.292+0000 INFO  Bolt enabled on 127.0.0.1:7687.
+2020-01-05 10:20:54.239+0000 INFO  Started.
+2020-01-05 10:20:54.421+0000 INFO  Mounted REST API at: /db/manage
+2020-01-05 10:20:54.443+0000 WARN  Server thread metrics not available (missing neo4j.server.threads.jetty.all)
+2020-01-05 10:20:54.444+0000 WARN  Server thread metrics not available (missing neo4j.server.threads.jetty.idle)
+2020-01-05 10:20:54.509+0000 INFO  Server thread metrics have been registered successfully
+2020-01-05 10:20:55.221+0000 INFO  Remote interface available at http://localhost:7474/
+2020-01-05 10:23:00.659+0000 INFO  ======== Neo4j 3.5.6 ========
+2020-01-05 10:23:00.669+0000 INFO  Starting...
+2020-01-05 10:23:01.681+0000 INFO  Initiating metrics...
+2020-01-05 10:23:03.376+0000 INFO  Sending metrics to CSV file at C:\Users\pause\.Neo4jDesktop\neo4jDatabases\database-9fc01ad8-3c76-4150-a803-5f8cbaafc176\installation-3.5.6\metrics
+2020-01-05 10:23:04.155+0000 INFO  Bolt enabled on 127.0.0.1:7687.
+2020-01-05 10:23:05.721+0000 INFO  Started.
+2020-01-05 10:23:05.903+0000 INFO  Mounted REST API at: /db/manage
+2020-01-05 10:23:05.973+0000 INFO  Server thread metrics have been registered successfully
+2020-01-05 10:23:06.690+0000 INFO  Remote interface available at http://localhost:7474/
+2020-01-05 10:23:38.492+0000 WARN  The client is unauthorized due to authentication failure.
+2020-01-05 10:27:29.746+0000 WARN  The client is unauthorized due to authentication failure.
