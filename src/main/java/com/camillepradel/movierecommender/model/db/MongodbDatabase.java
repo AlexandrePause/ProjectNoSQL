@@ -87,13 +87,14 @@ public class MongodbDatabase extends AbstractDatabase {
 	BasicDBObject userRatingsFilter = new BasicDBObject();
 	userRatingsFilter.put("user_id", userId);
 	Iterator<DBObject> cursorRatings = collectRatings.find(userRatingsFilter).iterator();
+        
 	while (cursorRatings.hasNext()) {
 		final DBObject currentRating = cursorRatings.next();
 		BasicDBObject ratingMoviesFilter = new BasicDBObject();
 		ratingMoviesFilter.put("id", Integer.parseInt(currentRating.get("mov_id").toString()));
 		DBObject currentMovie = collectMovies.findOne(ratingMoviesFilter);
 		movies.add(createMovie(db,currentMovie));
-		}
+	}
 
 	return movies;
     }
@@ -115,9 +116,9 @@ public class MongodbDatabase extends AbstractDatabase {
 		ratingMoviesFilter.put("id", Integer.parseInt(currentRating.get("mov_id").toString()));
 		DBObject currentMovie = collectMovies.findOne(ratingMoviesFilter);
 		ratings.add(new Rating(createMovie(db,currentMovie), userId, Integer.parseInt(currentRating.get("rating").toString())));
-		}
+	}
         
-		return ratings;
+	return ratings;
     }
 
     @Override

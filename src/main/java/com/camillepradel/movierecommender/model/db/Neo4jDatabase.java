@@ -24,6 +24,8 @@ import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.TransactionWork;
+import org.neo4j.driver.v1.types.Node;
+import org.neo4j.driver.v1.types.Relationship;
 
 public class Neo4jDatabase extends AbstractDatabase {
  Connection connection = null;
@@ -63,8 +65,7 @@ public class Neo4jDatabase extends AbstractDatabase {
         long endTime = System.currentTimeMillis();
         System.out.println("getAllMovies took " + (endTime - startTime) + " milliseconds (Neo4j)");
         
-        while (rs.hasNext())
-        {
+        while (rs.hasNext()) {
             Record record = rs.next();
             int id = record.get("m.id").asInt();
             String titre = record.get("m.title").asString();
@@ -87,32 +88,50 @@ public class Neo4jDatabase extends AbstractDatabase {
 
     @Override
     public List<Movie> getMoviesRatedByUser(int userId) {
-        // TODO: write query to retrieve all movies rated by user with id userId
         List<Movie> movies = new LinkedList<Movie>();
-        Genre genre0 = new Genre(0, "genre0");
-        Genre genre1 = new Genre(1, "genre1");
-        Genre genre2 = new Genre(2, "genre2");
-        movies.add(new Movie(0, "Titre 0", Arrays.asList(new Genre[]{genre0, genre1})));
-        movies.add(new Movie(3, "Titre 3", Arrays.asList(new Genre[]{genre0, genre1, genre2})));
+        Session session = driver.session();
+        StatementResult rs = session.run("MATCH (u:User{id:" + userId + "})-[r:RATED]->(m:Movie)-[r2:CATEGORIZED_AS]->(g:Genre) RETURN m.id, m.title, collect(g.name) as g_name");
+        
+        while (rs.hasNext()) {
+            Record record = rs.next();
+            Node m = record.get("m").asNode();
+            Movie mov = new Movie(m.get("id").asInt(),m.get("title").asString(),Arrays.asList(new Genre[]{}));
+            movies.add(mov);
+        }
+         
         return movies;
     }
 
     @Override
     public List<Rating> getRatingsFromUser(int userId) {
-        // TODO: write query to retrieve all ratings from user with id userId
         List<Rating> ratings = new LinkedList<Rating>();
-        Genre genre0 = new Genre(0, "genre0");
-        Genre genre1 = new Genre(1, "genre1");
-        ratings.add(new Rating(new Movie(0, "Titre 0", Arrays.asList(new Genre[]{genre0, genre1})), userId, 3));
-        ratings.add(new Rating(new Movie(2, "Titre 2", Arrays.asList(new Genre[]{genre1})), userId, 4));
+        Session session = driver.session();
+        StatementResult rs = session.run("MATCH (u:User{id:"+ userId + "})-[r:RATED]->(m:Movie)-[r2:CATEGORIZED_AS]->(g:Genre) Return r.note , m.title, m.id, collect(g.name) as g_name");
+        
+        while (rs.hasNext()){
+            Record record = rs.next();
+            Node u = record.get("u").asNode();
+            Relationship r = record.get("r").asRelationship();
+            Node m = record.get("m").asNode();
+            Movie mov = new Movie(m.get("id").asInt(), m.get("title").asString(), Arrays.asList(new Genre[]{}));
+            Rating rat = new Rating(mov, u.get("id").asInt(), r.get("rating").asInt());
+            ratings.add(rat);
+        }
+        
         return ratings;
     }
 
     @Override
     public void addOrUpdateRating(Rating rating) {
-        // TODO: add query which
-        //         - add rating between specified user and movie if it doesn't exist
-        //         - update it if it does exist
+        Session session = driver.session();    	
+        int movieId = rating.getMovieId();
+        int note = rating.getScore();
+        int userId = rating.getUserId();
+        StatementResult rs = session.run("MATCH (u:User{id:" + userId + "})-[r:RATED]->(m:Movie{id:" + movieId + "}) RETURN u.id, r.note, m.title");
+        String rq = rs.hasNext() ? "MATCH (u:User{id:" + userId + "})-[r:RATED]->(m:Movie{id:" + movieId + "}) SET r.note = " + note + " RETURN u.id, r.note, m.title" 
+                :   "MATCH (u:User{id:" + userId + "}), (m:Movie{id:" + movieId + "}) CREATE (u)-[r:RATED {note:" + note + ", timestamp:" + System.currentTimeMillis() + "}]->(m) RETURN u.id, m.title, r.note";
+        
+        session.run(rq);
     }
 
     @Override
